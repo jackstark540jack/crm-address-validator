@@ -3,8 +3,10 @@ import urllib.parse
 import streamlit as st
 import streamlit.components.v1 as components
 import requests
+import streamlit as st
+API_KEY = st.secrets["GOOGLE_API_KEY"]
 
-API_KEY = "AIzaSyBQg5w-2B6o-9P7cCWRQ7b4Zc9Qr1JcV5o"  # Replace with your actual API key
+  # Replace with your actual API key
 
 # -------------------- Helpers --------------------
 def extract_info(raw_string):
