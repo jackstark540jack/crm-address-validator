@@ -48,8 +48,9 @@ def get_accuracy_status(distance_km):
         return "❌ Poor", "error"
 
 def extract_info(raw_string):
-    # Updated regex to capture the full address including commas until latitude
-    match = re.search(r"Selected address: (.*?), latitude: ([\d.-]+), longitude: ([\d.-]+)", raw_string)
+    # Updated regex to capture both "Selected address:" and "Added address:" formats
+    # Matches full address including commas until latitude
+    match = re.search(r"(?:Selected|Added) address: (.*?), latitude: ([\d.-]+), longitude: ([\d.-]+)", raw_string)
     if match:
         address = match.group(1).strip()
         latitude = float(match.group(2))
@@ -318,7 +319,7 @@ col1, col2 = st.columns([3, 1])
 with col1:
     input_str = st.text_area(
         "Paste your CRM Address Input:",
-        placeholder="Example: Selected address: 123 Main St, New York, NY, latitude: 40.7128, longitude: -74.0060",
+        placeholder="Example formats:\nSelected address: 123 Main St, New York, NY, latitude: 40.7128, longitude: -74.0060\nOR\nAdded address: 639, Reside Inn Avenue, Bangalore, 560037, latitude: 12.9639445, longitude: 77.7142241",
         height=120,
         help="Paste the address data from your CRM system here"
     )
@@ -362,7 +363,7 @@ if process_btn and input_str.strip():
             st.success("✅ Address parsed successfully!")
         else:
             st.error("❌ Invalid input format. Please ensure it follows the correct structure.")
-            st.info("Expected format: 'Selected address: [address], latitude: [lat], longitude: [lng]'")
+            st.info("Expected formats: 'Selected address: [address], latitude: [lat], longitude: [lng]' OR 'Added address: [address], latitude: [lat], longitude: [lng]'")
 
 elif process_btn:
     st.warning("⚠️ Please enter some address data to process.")
@@ -538,8 +539,10 @@ if not st.session_state.processed_data:
             <li>⚡ <strong>Validate</strong> accuracy of your CRM coordinates</li>
         </ul>
         
-        <h4>📝 Expected Input Format:</h4>
+        <h4>📝 Expected Input Formats:</h4>
         <code>Selected address: [Your Address Here], latitude: [Latitude], longitude: [Longitude]</code>
+        <br/><br/>
+        <code>Added address: [Your Address Here], latitude: [Latitude], longitude: [Longitude]</code>
         
         <h4>🎯 Purpose:</h4>
         <p>Compare the coordinates stored in your CRM with what Google Maps thinks those coordinates should be for the same address.</p>
