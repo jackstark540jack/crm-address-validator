@@ -422,6 +422,32 @@ if st.session_state.processed_data:
         # Use edited address if available, otherwise use original
         map2_address = edited_address if edited_address.strip() else data['original_address']
         
+        # Check if the address was edited and geocode the new address
+        if edited_address.strip() and edited_address.strip() != data['original_address']:
+            # Address was edited, geocode the new address
+            with st.spinner("🌐 Geocoding edited address..."):
+                edited_formatted_address, edited_geo_lat, edited_geo_lng = geocode_address(edited_address.strip())
+                if edited_formatted_address and edited_geo_lat and edited_geo_lng:
+                    # Use the edited address geocoded coordinates for Map2
+                    map2_geo_data = {
+                        'formatted_address': edited_formatted_address,
+                        'lat': edited_geo_lat,
+                        'lng': edited_geo_lng
+                    }
+                    # Calculate distance from original input coordinates to edited address coordinates
+                    distance = calculate_distance(
+                        data['lat'], data['lng'],
+                        edited_geo_lat, edited_geo_lng
+                    )
+                    st.info(f"📍 Edited address geocoded successfully! Distance from original coordinates: {format_distance(distance)}")
+                else:
+                    # Fallback to original geocoded data if edited address geocoding fails
+                    map2_geo_data = geo_data
+                    st.warning("⚠️ Could not geocode edited address. Using original address coordinates.")
+        else:
+            # Use original geocoded data
+            map2_geo_data = geo_data
+        
         # Show two maps side by side
         st.markdown("---")
         col1, col2 = st.columns(2)
@@ -439,7 +465,7 @@ if st.session_state.processed_data:
         
         with col2:
             st.subheader("🔵 Map2: Address Text")
-            st.markdown(f'<div class="map-caption">Google\'s coordinates: {geo_data["lat"]:.6f}, {geo_data["lng"]:.6f}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="map-caption">Google\'s coordinates: {map2_geo_data["lat"]:.6f}, {map2_geo_data["lng"]:.6f}</div>', unsafe_allow_html=True)
             st.markdown(f'<div class="map-caption">Using address: {map2_address}</div>', unsafe_allow_html=True)
             st.markdown('<div class="map-container">', unsafe_allow_html=True)
             components.iframe(embed_map_from_address(map2_address), height=400)
